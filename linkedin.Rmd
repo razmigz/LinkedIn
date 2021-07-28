@@ -39,7 +39,7 @@ ggplot(top.50.companies, aes(x=reorder(companyName, n), y=n)) +
   labs(x = "Company", y = "Number of Employees on LinkedIn", title = "Number of Employees Per Company on LinkedIn") 
 ```
 
-
+Telstra has the most employees on LinkedIn by a good amount. 
 We start by checking how many observations we have and seeing how many of these individuals have at least 500 connections.
 
 ```{r}
