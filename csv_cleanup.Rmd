@@ -1,0 +1,61 @@
+---
+title: "data cleanup"
+author: "Razmig Zeitounian"
+date: "7/27/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+df <- read_csv("dump.csv") %>% 
+  # drop ID column
+  select(-X1)
+
+# a function with two arguments. takes a vector x to check if it as least 500 and creates a new column y
+at.least.500 <- function(x, y){
+  y <- rep(NA, length(x))
+  if (x >= 500){
+    df$y = TRUE
+  } else {
+    df$y = FALSE
+  }
+}
+
+sapply(df$connectionsCount, at.least.500)
+
+# create a new column to check if a person has at least 500 connections using handmade function
+df$connectionsCount %>% 
+  map(at.least.500) %>% 
+  map_lgl(at.least.500)
+
+# create a new column to check if a person has at least 500 connections using handmade function
+atLeast500 <- df %>% 
+  pull(connectionsCount) %>% 
+  map_lgl(at.least.500)
+
+df2 <- df %>% 
+  bind_cols(atLeast500) %>% 
+  rename(atLeast500c = ...27)
+
+# save updated df as a new csv
+write.csv(df2, "LinkedIn.csv")
+```
+
+```{r eval=FALSE, include=FALSE}
+# archived code
+# since we will be interested in if someone has 500+ connections, we will add a new column for that to our current df
+df$atLeast500 <- rep(NA, length(df$ageEstimate))
+
+df <- df %>% 
+  mutate(atLeast500 = if(df$connectionsCount >= 500) {
+      df$atLeast500 = TRUE
+    } else {
+      df$atLeast500 = FALSE
+    }
+  )
+
+# test function
+df.mini <- df %>% 
+  select(connectionsCount)
+```
+

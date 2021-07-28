@@ -12,11 +12,49 @@ library(tidyverse)
 df <- read_csv("dump.csv") %>% 
   # drop ID column
   select(-X1)
+
+# we will treat country as a factor (rather than as a character) since it is a variable with one level (au)
+df$country <- as.factor(df$country)
+
+# a function with two arguments. takes a vector x to check if it as least 500 and creates a new column y
+at.least.500 <- function(x, y){
+  y <- rep(NA, length(x))
+  if (x >= 500){
+    df$y = TRUE
+  } else {
+    df$y = FALSE
+  }
+}
+
+sapply(df$connectionsCount, at.least.500)
+
+# create a new column to check if a person has at least 500 connections using handmade function
+df$connectionsCount %>% 
+  map(at.least.500) %>% 
+  map_lgl(at.least.500)
+
+# create a new column to check if a person has at least 500 connections using handmade function
+atLeast500 <- df %>% 
+  pull(connectionsCount) %>% 
+  map_lgl(at.least.500)
+
+df2 <- df %>% 
+  bind_cols(atLeast500) %>% 
+  rename(atLeast500c = ...28)
 ```
 
+We show a quick preview of our data to make the data easier to understand.
+
 ```{r}
-head(df)
+head(df, 10)
 ```
+
+In particular, our variables are as follows.
+
+```{r}
+colnames(df)
+```
+
 
 Let's see the top 50 companies to work for from our sample. 
 
