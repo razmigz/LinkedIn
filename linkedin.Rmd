@@ -18,10 +18,27 @@ df <- read_csv("dump.csv") %>%
 head(df)
 ```
 
+Let's see the top 50 companies to work for from our sample. 
+
 ```{r}
-df %>% 
-  sort(companyFollowerCount)
+(top.50.companies <- df %>% 
+  group_by(companyName) %>% 
+  count() %>% 
+  arrange(desc(n)) %>% 
+  head(50)
+)
 ```
+
+We can visualize the number of employees at each company with a barplot.
+
+```{r}
+# we will reorder to show the companies with the most employees at the top of the chart for readability
+ggplot(top.50.companies, aes(x=reorder(companyName, n), y=n)) +
+  geom_bar(stat = "identity", fill = "seagreen2", col = "pink") +
+  coord_flip() +
+  labs(x = "Company", y = "Number of Employees on LinkedIn", title = "Number of Employees Per Company on LinkedIn") 
+```
+
 
 We start by checking how many observations we have and seeing how many of these individuals have at least 500 connections.
 
