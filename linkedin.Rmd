@@ -7,40 +7,20 @@ output: html_document
 
 Data Source: https://www.kaggle.com/killbot/linkedin-profiles-and-jobs-data 
 
-```{r, message=FALSE}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
-df <- read_csv("dump.csv") %>% 
+library(ISLR)
+library(e1071)
+library(knitr)
+
+df <- read_csv("LinkedIn.csv") %>% 
   # drop ID column
   select(-X1)
 
 # we will treat country as a factor (rather than as a character) since it is a variable with one level (au)
 df$country <- as.factor(df$country)
-
-# a function with two arguments. takes a vector x to check if it as least 500 and creates a new column y
-at.least.500 <- function(x, y){
-  y <- rep(NA, length(x))
-  if (x >= 500){
-    df$y = TRUE
-  } else {
-    df$y = FALSE
-  }
-}
-
-sapply(df$connectionsCount, at.least.500)
-
-# create a new column to check if a person has at least 500 connections using handmade function
-df$connectionsCount %>% 
-  map(at.least.500) %>% 
-  map_lgl(at.least.500)
-
-# create a new column to check if a person has at least 500 connections using handmade function
-atLeast500 <- df %>% 
-  pull(connectionsCount) %>% 
-  map_lgl(at.least.500)
-
-df2 <- df %>% 
-  bind_cols(atLeast500) %>% 
-  rename(atLeast500c = ...28)
+# treat isPremium as a factor (0 = No, 1 = Yes)?
+df$isPremium <- as.factor(df$isPremium)
 ```
 
 We show a quick preview of our data to make the data easier to understand.
@@ -84,11 +64,10 @@ We start by checking how many observations we have and seeing how many of these 
 dim(df)
 at.least.500c <- df %>% 
   count(connectionsCount >= 500)
-ggplot(as.data.frame(at.least.500c), aes(n)) + geom_bar()
 
 ggplot(as.data.frame(at.least.500c), aes(`connectionsCount >= 500`, n, label = n)) + 
   geom_bar(stat = "identity", col = "blue", fill = "pink") +
-  labs(x = "User has 500+ Connections", title = "Number of LinkedIn Users with 500+ Connections") +
+  labs(x = "User has 500+ Connections", y= "Number of Users", title = "Number of LinkedIn Users with 500+ Connections") +
   geom_text(hjust = 0.5, vjust = 10.5)
 ```
 
@@ -97,12 +76,17 @@ Another area we may be interested in is the age distribution of LinkedIn members
 ```{r}
 ggplot(df, aes(ageEstimate)) +
   geom_histogram(col = "cornsilk2", fill = "indianred", binwidth = 5) +
-  labs(title = "Distribution of LinkedIn Users' Age")
+  labs(title = "Distribution of LinkedIn Users' Age", x = "Age Estimate", y = "Count")
 ```
 
 We see that LinkedIn users tend to be on the younger side as the data are skewed right. This makes sense since LinkedIn is a networking platform and older people are less likely to be searching for jobs. We see practically no users of age 70 or greater.
 
-```{r}
 
+We may be interested in predicting if a user has at least 500 connections. To get an idea of how many users in our data have 500 connections or more, we make a simple table showing counts, as well as one showing percentages.
+
+```{r}
+df %>% 
+  group_by(atLeast500c) %>% 
+  summarize(count = n(), p = n()/nrow(df))
 ```
 
